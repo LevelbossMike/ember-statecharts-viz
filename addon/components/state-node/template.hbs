@@ -1,0 +1,87 @@
+<div>
+  <div
+    date-state-node-label
+    class="text-xxs text-bold {{if isActive 'text-blue' 'text-black'}}"
+  >
+    {{stateNode.key}}
+  </div>
+  <div
+    data-state-node={{stateNode.id}}
+    data-state-node-body
+    class="
+      min-h-4 border-2 rounded
+      {{if isParallel 'border-dotted'}}
+      {{if isActive 'border-blue' 'border-grey'}}
+      {{if isPreview 'border-blue-light'}}
+    "
+  >
+    <div data-state-node-body-content>
+      {{#each onEntries as |onEntry|}}
+        <div class="text-xxs pt-2 px-2">
+          <strong>onEntry /</strong> {{onEntry.type}}
+        </div>
+      {{/each}}
+      {{#each onExits as |onExit|}}
+        <div class="text-xxs pt-2 px-2">
+          <strong>onExit /</strong> {{onExit.type}}
+        </div>
+      {{/each}}
+    </div>
+    <div data-state-node-transitions>
+      {{#each transitions as |transition|}}
+        <div>
+          <div class="flex justify-end">
+            <button
+              data-id="{{stateNode.key}}:{{transition.event}}->{{transition.target}}"
+              class="flex justify-between items-center focus:outline-none py-1 px-1 ml-2 -mr-2 my-2 rounded-full {{if isActive 'bg-blue' 'bg-grey'}}"
+              onmouseover={{action onPreviewTransition transition.target.firstObject}}
+              onmouseout={{action onUnpreviewTransition}}
+              onclick={{action onClickTransition transition}}
+            >
+              <div class="ml-1 text-xs text-white">
+                {{transition.event}}
+              </div>
+              <div class="h-2 w-2 bg-white ml-1 rounded-full"></div>
+            </button>
+          </div>
+          {{#if (or transition.cond transition.actions)}}
+            <div class="text-xxs text-right px-2 pb-1">
+              {{#if transition.cond}}
+                <div>
+                  <strong>[</strong>
+                    {{transition.cond}}
+                  <strong>]</strong>
+                </div>
+              {{/if}}
+              {{#each transition.actions as |action|}}
+                <div>
+                  <strong>do /</strong> {{action.type}}
+                </div>
+              {{/each}}
+            </div>
+          {{/if}}
+        </div>
+      {{/each}}
+    </div>
+    {{#if states}}
+      <div>
+        <div data-state-node-sub-states class="border-t border-grey flex p-4">
+          {{#if showStates}}
+            {{#each states as |stateNode|}}
+              <div class="m-4">
+                {{state-node stateNode=stateNode}}
+              </div>
+            {{/each}}
+          {{/if}}
+        </div>
+        <div class="flex justify-end items-center m-2 font-lg">
+          <button class="flex h-2 w-4 justify-between items-center" onclick={{action 'toggleStates'}}>
+            <div class="h-1 w-1 rounded-full bg-black"></div>
+            <div class="h-1 w-1 rounded-full bg-black"></div>
+            <div class="h-1 w-1 rounded-full bg-black"></div>
+          </button>
+        </div>
+      </div>
+    {{/if}}
+  </div>
+</div>

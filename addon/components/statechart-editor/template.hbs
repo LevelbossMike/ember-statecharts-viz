@@ -1,0 +1,32 @@
+<header class="border-b border-black mb-2">
+  {{machine.key}}
+</header>
+<div class="flex relative">
+  {{#each machineStates as |stateNode|}}
+    <div class="m-4">
+      {{state-node
+        stateNode=stateNode
+        activeState=activeState
+        previewState=previewState
+        onPreviewTransition=(action (mut previewStateValue))
+        onUnpreviewTransition=(action (mut previewStateValue) null)
+        onClickTransition=(action 'followStateChartTransition')
+      }}
+    </div>
+  {{/each}}
+  {{#ui-svg class="absolute pin h-full w-full pointer-events-none" as |c|}}
+    {{#each edges as |edge|}}
+      {{c.ui.edge
+        sourceNode=edge.source
+        targetNode=edge.target
+        event=edge.event
+        edge=edge
+        activeState=activeState
+        previewState=previewState
+      }}
+    {{/each}}
+    {{#each initialStates as |stateNode|}}
+      {{c.ui.initialEdge node=stateNode activeState=activeState}}
+    {{/each}}
+  {{/ui-svg}}
+</div>
