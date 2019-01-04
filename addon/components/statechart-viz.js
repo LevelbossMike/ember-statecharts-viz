@@ -3,7 +3,8 @@ import { computed } from '@ember/object';
 import { statechart } from 'ember-statecharts/computed';
 import { getEdges } from "xstate/lib/graph";
 import { interpret } from 'xstate/lib/interpreter';
-import { flatten } from 'svg-arrows/utils/statecharts-tooling';
+import { flatten } from 'ember-statecharts-viz/utils/statecharts-tooling';
+import layout from '../templates/components/statechart-viz';
 
 function initialStateNodes(stateNode) {
   var stateKeys = Object.keys(stateNode.states);
@@ -19,6 +20,7 @@ function initialStateNodes(stateNode) {
 }
 
 export default Component.extend({
+  layout,
   tagName: '',
 
   machine: computed('statechart', function() {
@@ -158,6 +160,10 @@ export default Component.extend({
   actions: {
     followStateChartTransition(transition) {
       this.interpreter.send(transition.event);
+    },
+
+    setPreviewStateValue([transitionTargetKey]) {
+      this.set('previewStateValue', transitionTargetKey);
     }
   }
 });

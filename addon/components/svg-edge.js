@@ -1,9 +1,11 @@
 import Component from '@ember/component';
 import { computed } from '@ember/object';
 import { and } from '@ember/object/computed';
-import { relative, center } from 'svg-arrows/utils/svg-tooling';
+import { relative, center } from 'ember-statecharts-viz/utils/svg-tooling';
+import layout from '../templates/components/svg-edge';
 
 export default Component.extend({
+  layout,
   tagName: '',
 
   sourceNode: null,

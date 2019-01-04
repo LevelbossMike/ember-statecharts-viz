@@ -34,7 +34,7 @@
             <button
               data-id="{{stateNode.key}}:{{transition.event}}->{{transition.target}}"
               class="flex justify-between items-center focus:outline-none py-1 px-1 ml-2 -mr-2 my-2 rounded-full {{if isActive 'bg-blue' 'bg-grey'}}"
-              onmouseover={{action onPreviewTransition transition.target.firstObject}}
+              onmouseover={{action onPreviewTransition transition.target}}
               onmouseout={{action onUnpreviewTransition}}
               onclick={{action onClickTransition transition}}
             >

@@ -1,0 +1,1 @@
+export { default } from 'ember-statecharts-viz/components/svg-initial-edge';

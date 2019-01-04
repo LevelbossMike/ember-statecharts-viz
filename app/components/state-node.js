@@ -1,0 +1,1 @@
+export { default } from 'ember-statecharts-viz/components/state-node';

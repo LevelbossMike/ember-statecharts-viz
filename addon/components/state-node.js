@@ -1,11 +1,13 @@
 import Component from '@ember/component';
 import { computed } from '@ember/object';
+import layout from '../templates/components/state-node';
 
 function flatten(array) {
   return [].concat(...array);
 }
 
 export default Component.extend({
+  layout,
   tagName: '',
 
   // throw if this is not being set
