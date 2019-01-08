@@ -27,6 +27,10 @@ export default Component.extend({
   }),
 
   isActive: computed('activeState', 'stateNode', function() {
+    if (!this.activeState) {
+      return false;
+    }
+
     return this.activeState.indexOf(this.stateNode) > -1;
   }),
 

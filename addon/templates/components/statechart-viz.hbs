@@ -14,6 +14,7 @@
       }}
     </div>
   {{/each}}
+  {{#if displayEdges}}
   {{#ui-svg class="absolute pin h-full w-full pointer-events-none" as |c|}}
     {{#each edges as |edge|}}
       {{c.ui.edge
@@ -25,8 +26,9 @@
         previewState=previewState
       }}
     {{/each}}
-    {{#each initialStates as |stateNode|}}
-      {{c.ui.initialEdge node=stateNode activeState=activeState}}
+    {{#each initialStates as |node|}}
+      {{c.ui.initialEdge node=node activeState=activeState}}
     {{/each}}
   {{/ui-svg}}
+  {{/if}}
 </div>

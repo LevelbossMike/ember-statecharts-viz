@@ -1,8 +1,15 @@
 <div class="h-full flex">
   <div class="flex-grow">
-    {{statechart-viz}}
+    {{#if machine}}
+      {{statechart-viz machine=machine}}
+    {{/if}}
   </div>
   <div class="bg-red flex-no-shrink w-128">
-    Editor
+    {{ember-ace
+      value=value
+      update=(action 'updateConfig')
+      class="h-full"
+      editorClass="h-full"
+    }}
   </div>
 </div>
