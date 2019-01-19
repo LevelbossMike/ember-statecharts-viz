@@ -27,6 +27,10 @@ export default Component.extend({
 
     const domElement = document.querySelector(`[data-state-node="${sourceNode.id}"`);
 
+    if (!domElement) {
+      return;
+    }
+
     return relative(
       domElement.getBoundingClientRect(),
       svg.getBoundingClientRect()
@@ -40,6 +44,10 @@ export default Component.extend({
 
     const domElement = document.querySelector(`[data-state-node="${targetNode.id}"`);
 
+    if (!domElement) {
+      return;
+    }
+
     return relative(
       domElement.getBoundingClientRect(),
       svg.getBoundingClientRect()
@@ -51,6 +59,10 @@ export default Component.extend({
 
     const querySelector=`[data-id="${sourceNode.key}:${this.event}->${targetNode.key}"]`;
     const domElement = document.querySelector(querySelector);
+
+    if (!domElement) {
+      return;
+    }
 
     return relative(
       domElement.getBoundingClientRect(),

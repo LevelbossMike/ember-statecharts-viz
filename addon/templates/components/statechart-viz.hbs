@@ -14,21 +14,21 @@
       }}
     </div>
   {{/each}}
-  {{#if displayEdges}}
   {{#ui-svg class="absolute pin h-full w-full pointer-events-none" as |c|}}
-    {{#each edges as |edge|}}
-      {{c.ui.edge
-        sourceNode=edge.source
-        targetNode=edge.target
-        event=edge.event
-        edge=edge
-        activeState=activeState
-        previewState=previewState
-      }}
-    {{/each}}
-    {{#each initialStates as |node|}}
-      {{c.ui.initialEdge node=node activeState=activeState}}
-    {{/each}}
+    {{#if canRenderEdges}}
+      {{#each edges as |edge|}}
+        {{c.ui.edge
+          sourceNode=edge.source
+          targetNode=edge.target
+          event=edge.event
+          edge=edge
+          activeState=activeState
+          previewState=previewState
+        }}
+      {{/each}}
+      {{#each initialStates as |node|}}
+        {{c.ui.initialEdge node=node activeState=activeState}}
+      {{/each}}
+    {{/if}}
   {{/ui-svg}}
-  {{/if}}
 </div>

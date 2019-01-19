@@ -1,8 +1,9 @@
 import Component from '@ember/component';
 import layout from '../templates/components/statechart-editor';
 import { computed } from '@ember/object';
-import { statechart } from 'ember-statecharts/computed';
+import { statechart, matchesState } from 'ember-statecharts/computed';
 import { task, timeout } from 'ember-concurrency';
+import { next } from '@ember/runloop';
 import { Machine } from 'xstate';
 
 export default Component.extend({
@@ -14,6 +15,10 @@ export default Component.extend({
     // const machine = this.get('statechart.machine');
 
     // return JSON.stringify(assign({}, { initial: machine.config.initial, states: machine.config.states }), null, 2);
+  }),
+
+  canRenderEdges: matchesState({
+    success: 'canRenderEdges'
   }),
 
   statechart: statechart(
@@ -37,6 +42,15 @@ export default Component.extend({
           onEntry: ['replaceMachine'],
           on: {
             type: 'busy'
+          },
+          initial: 'renderingNodes',
+          states: {
+            renderingNodes: {
+              on: {
+                completeRenderingNodes: 'canRenderEdges'
+              }
+            },
+            canRenderEdges: {},
           }
         },
         error: {
@@ -53,6 +67,10 @@ export default Component.extend({
         },
         replaceMachine({ machine }) {
           this.set('machine', machine);
+
+          next(() => {
+            this.statechart.send('completeRenderingNodes');
+          });
         }
       }
     }
