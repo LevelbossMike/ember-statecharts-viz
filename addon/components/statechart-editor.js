@@ -42,15 +42,6 @@ export default Component.extend({
           onEntry: ['replaceMachine'],
           on: {
             type: 'busy'
-          },
-          initial: 'renderingNodes',
-          states: {
-            renderingNodes: {
-              on: {
-                completeRenderingNodes: 'canRenderEdges'
-              }
-            },
-            canRenderEdges: {},
           }
         },
         error: {

@@ -34,7 +34,7 @@
             <button
               data-id="{{stateNode.key}}:{{transition.event}}->{{transition.target}}"
               class="flex justify-between items-center focus:outline-none py-1 px-1 ml-2 -mr-2 my-2 rounded-full {{if isActive 'bg-blue' 'bg-grey'}}"
-              onmouseover={{action onPreviewTransition transition.target}}
+              onmouseover={{action onPreviewTransition transition.event transition.target}}
               onmouseout={{action onUnpreviewTransition}}
               onclick={{action onClickTransition transition}}
             >
@@ -49,7 +49,7 @@
               {{#if transition.cond}}
                 <div>
                   <strong>[</strong>
-                    {{transition.cond}}
+                  {{transition.cond}}
                   <strong>]</strong>
                 </div>
               {{/if}}
@@ -69,13 +69,23 @@
           {{#if showStates}}
             {{#each states as |stateNode|}}
               <div class="m-4">
-                {{state-node stateNode=stateNode}}
+                {{state-node
+                  stateNode=stateNode
+                  activeState=activeState
+                  previewState=previewState
+                  onPreviewTransition=onPreviewTransition
+                  onUnpreviewTransition=onUnpreviewTransition
+                  onClickTransition=onClickTransition
+                }}
               </div>
             {{/each}}
           {{/if}}
         </div>
         <div class="flex justify-end items-center m-2 font-lg">
-          <button class="flex h-2 w-4 justify-between items-center" onclick={{action 'toggleStates'}}>
+          <button
+            class="flex h-2 w-4 justify-between items-center"
+            onclick={{action "toggleStates"}}
+          >
             <div class="h-1 w-1 rounded-full bg-black"></div>
             <div class="h-1 w-1 rounded-full bg-black"></div>
             <div class="h-1 w-1 rounded-full bg-black"></div>

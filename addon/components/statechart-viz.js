@@ -1,6 +1,6 @@
 import Component from '@ember/component';
 import { computed } from '@ember/object';
-import { statechart } from 'ember-statecharts/computed';
+import { statechart, matchesState } from 'ember-statecharts/computed';
 import { getEdges } from "xstate/lib/graph";
 import { interpret } from 'xstate/lib/interpreter';
 import { flatten } from 'ember-statecharts-viz/utils/statecharts-tooling';
@@ -23,10 +23,86 @@ export default Component.extend({
   layout,
   tagName: '',
 
-  machine: computed('statechart', function() {
-    const { machine } = this.statechart;
+  machine: null,
 
-    return machine;
+  canRenderStatechart: matchesState({
+    machinePresent: 'success'
+  }),
+
+  statechart: statechart({
+    initial: 'idle',
+    states: {
+      idle: {
+        on: {
+          machineUpdated: 'machinePresent'
+        }
+      },
+      machinePresent: {
+        initial: 'interpretingMachine',
+        states: {
+          interpretingMachine: {
+            onEntry: ['interpretMachine'],
+            on: {
+              resolve: 'success',
+              reject: 'error'
+            }
+          },
+          success: {
+            onEntry: ['replaceVizData'],
+          },
+          error: {
+            onEntry: ['logError'],
+          }
+        },
+        on: {
+          machineUpdated: 'machinePresent'
+        }
+      }
+    }
+  }, {
+    actions: {
+      interpretMachine({ machine }) {
+        // as all these getters can fail even with a machine from xstate
+        // we need to fetch this from the statechart and can't use computeds
+        // we simply can't assume just because we passed a machine that the
+        // machine is a valid machine
+        try {
+          const interpreter = this.interpretMachine(machine);
+          const initialStates = this.getInitialStates(machine);
+          const edges = this.getEdges(machine);
+
+          this.statechart.send('resolve', { interpreter, initialStates, edges });
+        } catch(e) {
+          this.statechart.send('reject', { error: e });
+        }
+      },
+      replaceVizData({ interpreter, initialStates, edges }) {
+        this.setProperties({
+          interpreter, initialStates, edges
+        });
+      }
+    },
+
+    logError({ error }) {
+      this.set('error', error);
+    }
+  }),
+
+  activeState: computed('machine', 'currentState', function() {
+    return this.machine.getStates(this.interpreter.state.value);
+  }),
+
+  previewState: computed('machine', 'previewStateValue', function() {
+    if (!this.previewStateValue) {
+      return null;
+    }
+
+    return this.machine.getStates(this.previewStateValue);
+  }),
+
+  machineStates: computed('machine', function() {
+    const stateNames = Object.keys(this.machine.states);
+    return stateNames.map(name => this.machine.states[name])
   }),
 
   showActionTriggered(n) {
@@ -37,10 +113,10 @@ export default Component.extend({
     return confirm(`Checking condition ${n} - continue?`);
   },
 
-  interpreter: computed('machine', function() {
+  interpretMachine(machine) {
     // parse machine actions // get actions from them and stub them out
-    const actionNames = Object.keys(this.machine.options.actions || {});
-    const guardNames = Object.keys(this.machine.options.guards || {});
+    const actionNames = Object.keys(machine.options.actions || {});
+    const guardNames = Object.keys(machine.options.guards || {});
 
     const stubbedActions = actionNames.reduce((acc, n) => { 
       acc[n] = this.showActionTriggered.bind(this, n);
@@ -57,41 +133,37 @@ export default Component.extend({
     })
 
     return interpreter.start();
-  }),
+  },
 
-  activeState: computed('machine', 'currentState', function() {
-    return this.machine.getStates(this.interpreter.state.value);
-  }),
-
-  previewState: computed('machine', 'previewStateValue', function() {
-    if (!this.previewStateValue) {
-      return null;
-    }
-
-    return this.machine.getStates(this.previewStateValue);
-  }),
-
-  edges: computed('machine', function() {
-    const edges = getEdges(this.machine);
+  getEdges(machine) {
+    const edges = getEdges(machine);
     return edges;
-  }),
+  },
 
-  initialStates: computed('machine', function() {
-    return initialStateNodes(this.machine);
-  }),
+  getInitialStates(machine) {
+    return initialStateNodes(machine);
+  },
 
-  machineStates: computed('machine', function() {
-    const stateNames = Object.keys(this.machine.states);
-    return stateNames.map(name => this.machine.states[name])
-  }),
+  didReceiveAttrs() {
+    this._super(...arguments);
+
+    this.statechart.send('machineUpdated', { machine: this.machine });
+  },
 
   actions: {
     followStateChartTransition(transition) {
       this.interpreter.send(transition.event);
     },
 
-    setPreviewStateValue([transitionTargetKey]) {
-      this.set('previewStateValue', transitionTargetKey);
+    setPreviewStateValue(transitionEvent, [transitionTargetKey]) {
+      debugger;
+      this.set('previewStateValue', this.interpreter.nextState(transitionEvent).value);
+      // debugger;
+      // // use intepreter nextState to determine what would be the next state based on the transition event
+      // // if this is the same as the target passed preview it
+      // // this might get tricky for guards
+      // // we need to send cond name and automatically act like the transition was met 
+      // this.set('previewStateValue', transitionTargetKey);
     }
   }
 });

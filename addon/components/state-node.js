@@ -70,9 +70,21 @@ export default Component.extend({
     return onExit.map(action => action);
   }),
 
+  nestedPreviewState: computed('previewStateValue', function() {
+    if (!this.previewStateValue) {
+      return null;
+    }
+
+    return this.stateNode.getStates(this.previewStateValue);
+  }),
+
   actions: {
     toggleStates() {
       this.toggleProperty('showStates');
     },
+
+    setPreviewStateValue([transitionTargetKey]) {
+      this.set('previewStateValue', transitionTargetKey);
+    }
   }
 })
