@@ -1,10 +1,7 @@
 import Component from '@ember/component';
 import { computed } from '@ember/object';
 import layout from '../templates/components/state-node';
-
-function flatten(array) {
-  return [].concat(...array);
-}
+import { flatten } from 'ember-statecharts-viz/utils/statecharts-tooling';
 
 export default Component.extend({
   layout,
@@ -27,19 +24,23 @@ export default Component.extend({
   }),
 
   isActive: computed('activeState', 'stateNode', function() {
-    if (!this.activeState) {
-      return false;
-    }
+    const stateIds = this.stateNode.stateIds;
 
-    return this.activeState.indexOf(this.stateNode) > -1;
+    const activeStateIds =
+      (this.activeState && flatten(this.activeState.map(stateNode => stateNode.stateIds))) 
+      || [];
+
+    return stateIds.filter(stateId => activeStateIds.indexOf(stateId) > -1).length > 0;
   }),
 
   isPreview: computed('previewState', 'stateNode', function() {
-    if (!this.previewState) {
-      return false;
-    }
+    const stateIds = this.stateNode.stateIds;
 
-    return this.previewState.indexOf(this.stateNode) > -1;
+    const previewStateIds =
+      (this.previewState && flatten(this.previewState.map(stateNode => stateNode.stateIds))) 
+      || [];
+
+      return stateIds.filter(stateId => previewStateIds.indexOf(stateId) > -1).length > 0;
   }),
 
   states: computed(function() {
@@ -68,14 +69,6 @@ export default Component.extend({
     const { stateNode: { definition: { onExit } } } = this;
 
     return onExit.map(action => action);
-  }),
-
-  nestedPreviewState: computed('previewStateValue', function() {
-    if (!this.previewStateValue) {
-      return null;
-    }
-
-    return this.stateNode.getStates(this.previewStateValue);
   }),
 
   actions: {
