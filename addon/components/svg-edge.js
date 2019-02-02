@@ -17,7 +17,7 @@ export default Component.extend({
     const { sourceNode, targetNode, activeState, previewState } = this;
 
     return (activeState && activeState.indexOf(sourceNode) > -1)
-      && (previewState && previewState.indexOf(targetNode) > -1);
+      && (previewState && previewState.indexOf(targetNode) > -1)
   }),
 
   sourceRect: computed('sourceNode', function() {

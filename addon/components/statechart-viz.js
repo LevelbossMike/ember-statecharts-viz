@@ -109,7 +109,8 @@ export default Component.extend({
     console.log(`action ${n} was triggered`);
   },
 
-  confirmGuard(n) {
+  confirmGuard(n, ctx, event) {
+    debugger;
     return confirm(`Checking condition ${n} - continue?`);
   },
 
@@ -122,13 +123,8 @@ export default Component.extend({
       acc[n] = this.showActionTriggered.bind(this, n);
       return acc;
     }, {})
-    const stubbedGuards = guardNames.reduce((acc, n) => { 
-      acc[n] = this.confirmGuard.bind(this, n);
-      return acc;
-    }, {})
 
-
-    const interpreter = interpret(this.machine.withConfig({ actions: stubbedActions, guards: stubbedGuards })).onTransition(nextState => {
+    const interpreter = interpret(this.machine.withConfig({ actions: stubbedActions })).onTransition(nextState => {
       this.set('currentState', nextState);
     })
 
@@ -155,15 +151,25 @@ export default Component.extend({
       this.interpreter.send(transition.event);
     },
 
-    setPreviewStateValue(transitionEvent, [transitionTargetKey]) {
-      debugger;
-      this.set('previewStateValue', this.interpreter.nextState(transitionEvent).value);
-      // debugger;
-      // // use intepreter nextState to determine what would be the next state based on the transition event
-      // // if this is the same as the target passed preview it
-      // // this might get tricky for guards
-      // // we need to send cond name and automatically act like the transition was met 
-      // this.set('previewStateValue', transitionTargetKey);
+    setPreviewStateValue({ event, cond }) {
+      const { interpreter } = this;
+      const fn = this._setPrevieStateValue.bind(this, event);
+
+      this._passGuard({ cond, interpreter, fn });
     }
+  },
+
+  _passGuard({ cond, interpreter, fn}) {
+      const { machine } = interpreter;
+      const guardsCloned = Object.assign({}, machine.options.guards);
+      machine.options.guards[cond] = () => true;
+
+      fn();
+
+      machine.options.guards = guardsCloned;
+  },
+
+  _setPrevieStateValue(event) {
+      this.set('previewStateValue', this.interpreter.nextState(event).value);
   }
 });

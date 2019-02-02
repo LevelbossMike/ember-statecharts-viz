@@ -1,6 +1,6 @@
 import Component from '@ember/component';
 import { computed } from '@ember/object';
-import { and, readOnly } from '@ember/object/computed';
+import { and, readOnly, or } from '@ember/object/computed';
 import { relative } from 'ember-statecharts-viz/utils/svg-tooling';
 import layout from '../templates/components/svg-initial-edge';
 
@@ -9,6 +9,14 @@ export default Component.extend({
   tagName: '',
 
   node: null,
+
+  top: readOnly('nodeRect.top'),
+
+  left: readOnly('nodeRect.left'),
+
+  showAsActive: or('isActive', 'isPreviewed'),
+
+  canDraw: and('top', 'left'),
 
   nodeRect: computed('node', function() {
     const { node, svg } = this;
@@ -22,11 +30,6 @@ export default Component.extend({
       svg.getBoundingClientRect()
     );
   }),
-
-  top: readOnly('nodeRect.top'),
-  left: readOnly('nodeRect.left'),
-
-  canDraw: and('top', 'left'),
 
   path: computed('nodeRect', function() {
     const { nodeRect } = this;
@@ -48,5 +51,13 @@ export default Component.extend({
     }
 
     return this.activeState.indexOf(this.node) > -1;
+  }),
+
+  isPreviewed: computed('node', 'previewState', function() {
+    if (!this.previewState) {
+      return false;
+    }
+
+    return this.previewState.indexOf(this.node) > -1;
   })
 })

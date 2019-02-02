@@ -1,9 +1,9 @@
 <header class="border-b border-black mb-2">
-  {{machine.key}}
+  {{@machine.key}}
 </header>
 <div class="flex relative">
-  {{#if canRenderStatechart}}
-    {{#each machineStates as |stateNode|}}
+  {{#if this.canRenderStatechart}}
+    {{#each this.machineStates as |stateNode|}}
       <div class="m-4 p-4">
         {{state-node
           stateNode=stateNode
@@ -16,7 +16,7 @@
       </div>
     {{/each}}
     {{#ui-svg class="absolute pin h-full w-full pointer-events-none" as |c|}}
-      {{#each edges as |edge|}}
+      {{#each this.edges as |edge|}}
         {{c.ui.edge
           sourceNode=edge.source
           targetNode=edge.target
@@ -26,8 +26,12 @@
           previewState=previewState
         }}
       {{/each}}
-      {{#each initialStates as |node|}}
-        {{c.ui.initialEdge node=node activeState=activeState}}
+      {{#each this.initialStates as |node|}}
+        {{c.ui.initialEdge
+          node=node
+          activeState=activeState
+          previewState=previewState
+        }}
       {{/each}}
     {{/ui-svg}}
   {{/if}}
