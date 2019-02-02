@@ -83,6 +83,9 @@ export default Component.extend({
   actions: {
     updateConfig(string) {
       this.get('statechart').send('type', { config: string });
+    },
+    visualizeActionTriggered(actionName) {
+      console.log(`Triggered action : ${actionName}`);
     }
   }
 });

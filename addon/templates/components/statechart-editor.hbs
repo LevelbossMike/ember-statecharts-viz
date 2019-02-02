@@ -1,7 +1,10 @@
 <div class="h-full flex">
   <div class="flex-grow">
     {{#if machine}}
-      {{statechart-viz machine=machine}}
+      {{statechart-viz
+        machine=machine
+        onActionTriggered=(action "visualizeActionTriggered")
+      }}
     {{/if}}
   </div>
   <div class="bg-red flex-no-shrink w-128">

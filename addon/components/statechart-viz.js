@@ -105,26 +105,20 @@ export default Component.extend({
     return stateNames.map(name => this.machine.states[name])
   }),
 
-  showActionTriggered(n) {
-    console.log(`action ${n} was triggered`);
-  },
-
-  confirmGuard(n, ctx, event) {
-    debugger;
-    return confirm(`Checking condition ${n} - continue?`);
-  },
+  onActionTriggered(/* actionName */) {},
 
   interpretMachine(machine) {
     // parse machine actions // get actions from them and stub them out
     const actionNames = Object.keys(machine.options.actions || {});
-    const guardNames = Object.keys(machine.options.guards || {});
 
-    const stubbedActions = actionNames.reduce((acc, n) => { 
-      acc[n] = this.showActionTriggered.bind(this, n);
+    const stubbedActions = actionNames.reduce((acc, name) => { 
+      acc[name] = this.onActionTriggered.bind(this, name);
       return acc;
     }, {})
 
-    const interpreter = interpret(this.machine.withConfig({ actions: stubbedActions })).onTransition(nextState => {
+    const interpreter = interpret(this.machine.withConfig({
+      actions: stubbedActions
+    })).onTransition(nextState => {
       this.set('currentState', nextState);
     })
 
@@ -140,27 +134,8 @@ export default Component.extend({
     return initialStateNodes(machine);
   },
 
-  didReceiveAttrs() {
-    this._super(...arguments);
-
-    this.statechart.send('machineUpdated', { machine: this.machine });
-  },
-
-  actions: {
-    followStateChartTransition(transition) {
-      this.interpreter.send(transition.event);
-    },
-
-    setPreviewStateValue({ event, cond }) {
-      const { interpreter } = this;
-      const fn = this._setPrevieStateValue.bind(this, event);
-
-      this._passGuard({ cond, interpreter, fn });
-    }
-  },
-
-  _passGuard({ cond, interpreter, fn}) {
-      const { machine } = interpreter;
+  _passGuard({ cond, fn}) {
+      const { machine } = this.interpreter;
       const guardsCloned = Object.assign({}, machine.options.guards);
       machine.options.guards[cond] = () => true;
 
@@ -171,5 +146,29 @@ export default Component.extend({
 
   _setPrevieStateValue(event) {
       this.set('previewStateValue', this.interpreter.nextState(event).value);
-  }
+  },
+
+  _send(event) {
+    this.interpreter.send(event);
+  },
+
+  didReceiveAttrs() {
+    this._super(...arguments);
+
+    this.statechart.send('machineUpdated', { machine: this.machine });
+  },
+
+  actions: {
+    followStateChartTransition({ event, cond }) {
+      const fn = this._send.bind(this, event);
+
+      this._passGuard({cond, fn})
+    },
+
+    setPreviewStateValue({ event, cond }) {
+      const fn = this._setPrevieStateValue.bind(this, event);
+
+      this._passGuard({ cond, fn });
+    }
+  },
 });
