@@ -3,6 +3,7 @@ import { computed } from '@ember/object';
 import { and } from '@ember/object/computed';
 import { relative, center } from 'ember-statecharts-viz/utils/svg-tooling';
 import layout from '../templates/components/svg-edge';
+import { flatten } from 'ember-statecharts-viz/utils/statecharts-tooling';
 
 export default Component.extend({
   layout,
@@ -14,10 +15,17 @@ export default Component.extend({
 
   // rename active/preview to "node"
   isPreview: computed('sourceNode', 'targetNode', 'activeState', 'previewState', function() {
-    const { sourceNode, targetNode, activeState, previewState } = this;
+    const activeStateIds= flatten(this.activeState.map(stateNode => stateNode.stateIds));
+    const sourceNodeIds = this.sourceNode.stateIds;
+    const targetNodeIds = this.targetNode.stateIds;
+    const previewStateIds =
+      (this.previewState && flatten(this.previewState.map(stateNode => stateNode.stateIds))) 
+      || [];
 
-    return (activeState && activeState.indexOf(sourceNode) > -1)
-      && (previewState && previewState.indexOf(targetNode) > -1)
+    const sourceNodeIsActive = sourceNodeIds.filter(sourceNodeId => activeStateIds.indexOf(sourceNodeId) > -1).length > 0;
+    const targetNodeIsPreview = targetNodeIds.filter(sourceNodeId => previewStateIds.indexOf(sourceNodeId) > -1).length > 0;
+
+    return sourceNodeIsActive && targetNodeIsPreview;
   }),
 
   sourceRect: computed('sourceNode', function() {

@@ -145,7 +145,9 @@ export default Component.extend({
   },
 
   _setPrevieStateValue(event) {
-      this.set('previewStateValue', this.interpreter.nextState(event).value);
+    const previewStateValue = this.interpreter.nextState(event).value;
+
+    this.set('previewStateValue', previewStateValue);
   },
 
   _send(event) {
